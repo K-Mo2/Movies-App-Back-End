@@ -16,7 +16,6 @@ app.get("/", async (req, res) => {
       `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.API_KEY}`
     );
 
-    console.log(response);
     res.send(response.data);
   } catch (error) {
     res.send(new Error(error));
@@ -70,7 +69,6 @@ app.get("/favorites", async (req, res) => {
       await moviesArr.push(response.data);
     }
 
-    console.log(moviesArr);
 
     res.status(200).send(moviesArr);
   } catch (error) {
@@ -78,4 +76,16 @@ app.get("/favorites", async (req, res) => {
   }
 });
 
+app.delete("/favorites", async (req, res) => {
+  try {
+    const modelInstance = await main("favorites", favoritesSchema);
+
+    const deleteFavorite = await modelInstance.findOneAndDelete({
+      id: req.body.id,
+    });
+    res.status(200).send(deleteFavorite);
+  } catch (error) {
+    res.status(404).send(new Error({ Error: error }));
+  }
+});
 module.exports = app;

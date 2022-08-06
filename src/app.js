@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+require('dotenv').config();
 const { main } = require("./database/mongoose");
 const { favoritesSchema } = require("./database/model");
 
@@ -15,7 +16,7 @@ app.get("/", async (req, res) => {
     const response = await axios.get(
       `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.API_KEY}`
     );
-
+    
     res.send(response.data);
   } catch (error) {
     res.send(new Error(error));
@@ -39,19 +40,21 @@ app.post("/favorites", async (req, res) => {
   try {
     const modelInstance = await main("favorites", favoritesSchema);
     const isDuplicate = await modelInstance.exists({ id: req.body.id });
-
+    
     if (isDuplicate) {
-      throw new Error();
+      throw new Error({ Error: "Duplicate favorites"});
     }
-
+    
     const dataInstance = await main("favorites", favoritesSchema, {
       id: req.body.id,
     });
 
     const saveData = await dataInstance.save();
+    
     res.status(200).send(saveData);
+  
   } catch (error) {
-    res.status(404).send({ Error: "id exists" });
+      res.status(404).send({ Error: error.message });
   }
 });
 
@@ -68,9 +71,9 @@ app.get("/favorites", async (req, res) => {
       );
       await moviesArr.push(response.data);
     }
-
-
+    
     res.status(200).send(moviesArr);
+  
   } catch (error) {
     res.status(404).send({ Error: "No movies found" });
   }

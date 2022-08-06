@@ -5,7 +5,7 @@ const favoritesSchema = mongoose.Schema({
     type: String,
     unique: true,
     required: true,
-  },
+  }
 });
 
 module.exports = { favoritesSchema };
